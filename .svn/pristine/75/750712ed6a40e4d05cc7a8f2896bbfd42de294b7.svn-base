@@ -1,0 +1,213 @@
+/*
+ * <pre> 
+ * Class: <b>MenuBar</b> 
+ * File: MenuBar.java 
+ * Course: TCSS 305 – Autumn 2015
+ * Assignment 6 – Tetris
+ * Copyright 2015 Moe Abdipour
+ * </pre>
+ */
+
+package menu;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import javax.swing.JCheckBox;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import board.BoardPanel;
+import board.InfoPanel;
+
+/**
+ * <pre>
+ * This class is responsible to make the menu bar of the game.
+ * </pre>
+ * 
+ * @author Moe Abdipour
+ * @version 12/2/2015
+ * @since November 22, 2015
+ */
+
+public class MenuBar extends JMenuBar {
+
+	/**
+	 * The auto-generated serial ID.
+	 */
+	private static final long serialVersionUID = -4028310543698685039L;
+
+	/**
+	 * The new menu bar.
+	 */
+	private final JMenuBar myMenuBar;
+
+	/**
+	 * A BoardPanel object.
+	 */
+	private final BoardPanel myBoardPanel;
+
+	/**
+	 * An InfoPanel object.
+	 */
+	private final InfoPanel myInfoPanel;
+
+	/**
+	 * The getter method.
+	 * @return myMenuBar the new menu bar
+	 */
+	public JMenuBar getMenu() {
+		return myMenuBar;
+	}
+
+	/**
+	 * Constructor for the new menu bar.
+	 * 
+	 * @param theBoardPanel A BoardPanel object
+	 * @param theInfoPanel An InfoPanel object
+	 */
+	public MenuBar(BoardPanel theBoardPanel, InfoPanel theInfoPanel) {
+		myBoardPanel = theBoardPanel;
+		myInfoPanel = theInfoPanel;
+		myMenuBar = new JMenuBar();
+		buildGameMenu();
+		buildOptionsMenu();
+		buildHelpMenu();
+	}
+
+	/**
+	 * Sets up the game menu and adds it to the menu bar.
+	 */
+	private void buildGameMenu() {
+
+		final JMenu gameMenu = new JMenu("Game");
+		gameMenu.setMnemonic(KeyEvent.VK_G);
+
+		final JMenuItem newGameMenuItem = new JMenuItem("New Game");
+		newGameMenuItem.setMnemonic(KeyEvent.VK_N);
+		newGameMenuItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent the_event) {
+				myBoardPanel.newGame();
+				myInfoPanel.newGame();
+			}
+		});
+
+		final JMenuItem exitMenuItem = new JMenuItem("Exit");
+		exitMenuItem.setMnemonic(KeyEvent.VK_X);
+		exitMenuItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent the_event) {
+				System.exit(0);
+			}
+		});
+
+		gameMenu.add(newGameMenuItem);
+		gameMenu.addSeparator();
+		gameMenu.add(exitMenuItem);
+
+		myMenuBar.add(gameMenu);
+	}
+
+	/**
+	 * Sets up the option menu and adds it to the menu bar.
+	 */
+	private void buildOptionsMenu() {
+
+		final JMenu optionsMenu = new JMenu("Options");
+		optionsMenu.setMnemonic(KeyEvent.VK_O);
+
+		final JMenuItem controlkeyMenuItem = new JMenuItem("Control Keys...");
+		controlkeyMenuItem.setMnemonic(KeyEvent.VK_K);
+		controlkeyMenuItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent the_event) {
+				myBoardPanel.requestFocus();
+			}
+		});
+
+		final JMenuItem pauseMenuItem = new JMenuItem("Pause/Resume");
+		pauseMenuItem.setMnemonic(KeyEvent.VK_P);
+		pauseMenuItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent the_event) {
+				myBoardPanel.requestFocus();
+			}
+		});
+
+		final JCheckBox gridToggle = new JCheckBox("Grid");
+		gridToggle.setMnemonic(KeyEvent.VK_R);
+		gridToggle.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent the_event) {
+				myBoardPanel.enableGrid(gridToggle.isSelected());
+			} 
+		});
+
+		optionsMenu.add(controlkeyMenuItem);
+		optionsMenu.add(pauseMenuItem);
+		optionsMenu.addSeparator();
+		optionsMenu.add(gridToggle);
+
+		myMenuBar.add(optionsMenu);
+	}
+
+	/**
+	 * Sets up the help menu and adds it to the menu bar.
+	 */
+	private void buildHelpMenu() {
+		final JMenu helpMenu = new JMenu("Help");
+		helpMenu.setMnemonic(KeyEvent.VK_H);
+
+		final JMenuItem infoOption = new JMenuItem("Gameplay");
+		infoOption.setMnemonic(KeyEvent.VK_L);
+		infoOption.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent the_event) {
+				JOptionPane.showMessageDialog(null, 
+						"'Tetriminos' are game pieces shaped like tetrominoes, geometric shapes\n"
+								+ "composed of four square blocks each. A random sequence of Tetriminos\n"
+								+ "fall down the playing field (a rectangular vertical shaft, called the\n"
+								+ "'well' or 'matrix'). The objective of the game is to manipulate these\n"
+								+ "Tetriminos, by moving each one sideways (if the player feels the need)\n"
+								+ "and rotating it by 90 degree units, with the aim of creating a horizontal\n"
+								+ "line of ten units without gaps. When such a line is created, it disappears,\n"
+								+ "and any block above the deleted line will fall. When a certain number of\n"
+								+ "lines are cleared, the game enters a new level. As the game progresses,\n"
+								+ "each level causes the Tetriminos to fall faster, and the game ends when\n"
+								+ "the stack of Tetriminos reaches the top of the playing field and no new\n"
+								+ "Tetriminos are able to enter. Some games also end after a finite number of\n"
+								+ "levels or lines.\n"
+								+ "All of the Tetriminos are capable of single and double clears. I, J, and L are\n"
+								+ "able to clear triples. Only the I Tetrimino has the capacity to clear four lines\n"
+								+ "simultaneously, and this is referred to as a 'tetris'. (This may vary depending\n"
+								+ "on the rotation and compensation rules of each specific Tetris implementation.\n"
+								+ "For instance, in the Super Rotation System used in most recent implementations,\n"
+								+ "certain situations allow T, S, and Z to 'snap' into tight spots and clear triples.)\n"
+								+ "Source: Wikipedia", "Gameplay", JOptionPane.INFORMATION_MESSAGE);
+			}
+		});
+
+		final JMenuItem aboutOption = new JMenuItem("About");
+		aboutOption.setMnemonic(KeyEvent.VK_A);
+		aboutOption.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent the_event) {
+				JOptionPane.showMessageDialog(null, "TCSS 305 Tetris, Autumn 2015\n\n"
+						+ "Tetris is a Russian tile-matching puzzle video game, originally designed \n"
+						+ "and programmed by Alexey Pajitnov. It was released on June 6, 1984 while \n"
+						+ "he was working for the Dorodnicyn Computing Centre of the Academy of \n"
+						+ "Science of the USSR in Moscow. He derived its name from the Greek numerical \n"
+						+ "prefix tetra- (all of the game's pieces contain four segments) and tennis, \n"
+						+ "Pajitnov's favorite sport.\nSource: Wikipedia", "About", JOptionPane.INFORMATION_MESSAGE);
+			}
+		});
+
+		helpMenu.add(infoOption);
+		helpMenu.addSeparator();
+		helpMenu.add(aboutOption);
+
+		myMenuBar.add(helpMenu);
+	}
+}

@@ -1,0 +1,376 @@
+/*
+ * <pre> 
+ * Class: <b>MenuBar</b> 
+ * File: MenuBar.java 
+ * Course: TCSS 305 – Autumn 2015
+ * Assignment 6 – Tetris
+ * Copyright 2015 Moe Abdipour
+ * </pre>
+ */
+
+package menu;
+
+import board.BoardPanel;
+import board.InfoPanel;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+/**
+ * <pre>
+ * This class is responsible to make the menu bar of the game.
+ * </pre>
+ * 
+ * @author Moe Abdipour
+ * @version 12/11/2015
+ * @since November 22, 2015
+ */
+
+public class MenuBar extends JMenuBar { 
+
+    /**
+     * The auto-generated serial ID.
+     */
+    private static final long serialVersionUID = -4028310543698685039L;
+
+    /**
+     * The new menu bar.
+     */
+    private final JMenuBar myMenuBar;
+
+    /**
+     * A BoardPanel object.
+     */
+    private final BoardPanel myBoardPanel;
+
+    /**
+     * An InfoPanel object.
+     */
+    private final InfoPanel myInfoPanel;
+
+    /**
+     * The New Game menu item.
+     */
+    private final JMenuItem myNewGameMenuItem;
+
+    /**
+     * The End Game menu item.
+     */
+    private final JMenuItem myEndGameMenuItem;
+    
+    private static final int minDifficultyLevel = 1;
+    private static final int maxDifficultyLevel = 5;
+    
+
+    /**
+     * The listener that enables and disables the end game menu item.
+     */
+    private final PropertyChangeListener myEndGmmeListener = new PropertyChangeListener() {
+        @Override
+        public void propertyChange(final PropertyChangeEvent theEvent) {
+            myEndGameMenuItem.setEnabled(myBoardPanel.isPlaying());
+        }
+    };
+
+    /**
+     * The listener that enables and disables the new game menu item.
+     */
+    private final PropertyChangeListener myNewGameListener = new PropertyChangeListener() {
+        @Override
+        public void propertyChange(final PropertyChangeEvent theEvent) {
+            myNewGameMenuItem.setEnabled(!myBoardPanel.isPlaying());
+        }
+    };
+
+    /**
+     * Constructor for the new menu bar.
+     * 
+     * @param theBoardPanel A BoardPanel object
+     * @param theInfoPanel An InfoPanel object
+     */
+    public MenuBar(final BoardPanel theBoardPanel, final InfoPanel theInfoPanel) {
+        super();
+        myBoardPanel = theBoardPanel;
+        myInfoPanel = theInfoPanel;
+        myMenuBar = new JMenuBar();
+        myNewGameMenuItem = new JMenuItem();
+        myEndGameMenuItem = new JMenuItem();
+        buildGameMenu();
+        buildOptionsMenu();
+        buildHelpMenu();
+    }
+
+    /**
+     * The getter method.
+     * @return myMenuBar the new menu bar
+     */
+    public JMenuBar getMenu() {
+        return myMenuBar;
+    }
+
+    /**
+     * Sets up the game menu and adds it to the menu bar.
+     */
+    private void buildGameMenu() {
+
+        final JMenu gameMenu = new JMenu("Game");
+        gameMenu.setMnemonic(KeyEvent.VK_G);
+
+        myNewGameMenuItem.setText("New Game");
+        myNewGameMenuItem.setMnemonic(KeyEvent.VK_N);
+
+        myNewGameMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                myBoardPanel.newGame();
+                myInfoPanel.newGame();
+            }
+        });
+
+        myNewGameMenuItem.addPropertyChangeListener(myNewGameListener);
+
+        myEndGameMenuItem.setText("End Game");
+        myEndGameMenuItem.setMnemonic(KeyEvent.VK_E);
+        myEndGameMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                myBoardPanel.endGame();
+                myInfoPanel.stop();
+            }
+        });
+
+        myEndGameMenuItem.addPropertyChangeListener(myEndGmmeListener);
+
+        final JMenuItem exitMenuItem = new JMenuItem("Exit");
+        exitMenuItem.setMnemonic(KeyEvent.VK_X);
+        exitMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                System.exit(0);
+            }
+        });
+
+        gameMenu.add(myNewGameMenuItem);
+        gameMenu.addSeparator();
+        gameMenu.add(myEndGameMenuItem);
+        gameMenu.addSeparator();
+        gameMenu.add(exitMenuItem);
+
+        myMenuBar.add(gameMenu);
+    }
+
+    /**
+     * Sets up the option menu and adds it to the menu bar.
+     */
+    private void buildOptionsMenu() {
+
+        final JMenu optionsMenu = new JMenu("Options");
+        optionsMenu.setMnemonic(KeyEvent.VK_O);
+        
+        
+        final JMenu difficultyMenu = new JMenu("Difficulty");
+        difficultyMenu.setMnemonic(KeyEvent.VK_D);
+        difficultyMenu.add(buildDifficultySlider());
+        
+        final JMenuItem pauseMenuItem = new JMenuItem("Pause | Resume");
+        pauseMenuItem.setMnemonic(KeyEvent.VK_P);
+        pauseMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                myBoardPanel.requestFocus();
+                myBoardPanel.pause();
+            }
+        });
+
+        final JCheckBoxMenuItem gridMenuItem = new JCheckBoxMenuItem("Grid");
+        gridMenuItem.setMnemonic(KeyEvent.VK_R);
+
+        gridMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                myBoardPanel.toggleGrid();
+            } 
+        });
+
+        optionsMenu.add(difficultyMenu);
+        optionsMenu.addSeparator();
+        optionsMenu.add(pauseMenuItem);
+        optionsMenu.addSeparator();
+        optionsMenu.add(gridMenuItem);
+
+        myMenuBar.add(optionsMenu);
+    }
+    
+    /**
+     * Creates the JSlider object that specifies the difficulty of the game.
+     * @return difficultySlider The created JSlider.
+     */
+    private JSlider buildDifficultySlider() {
+
+        final JSlider difficultySlider = new JSlider();
+        difficultySlider.setMinimum(minDifficultyLevel);
+        difficultySlider.setMaximum(maxDifficultyLevel);
+        difficultySlider.setMajorTickSpacing(1);
+        difficultySlider.setMinorTickSpacing(1);
+        difficultySlider.setValue(1);
+        difficultySlider.setPaintTicks(true);
+        difficultySlider.setPaintLabels(true);
+
+        difficultySlider.addChangeListener(new ChangeListener() {
+
+            @Override
+            public void stateChanged(final ChangeEvent theArg) {
+                myBoardPanel.setDifficulty(difficultySlider.getValue());
+            }
+        });
+
+        return difficultySlider;
+    }
+
+    /**
+     * Sets up the help menu and adds it to the menu bar.
+     */
+    private void buildHelpMenu() {
+        final JMenu helpMenu = new JMenu("Help");
+        helpMenu.setMnemonic(KeyEvent.VK_H);
+
+        final JMenuItem practiceOption = new JMenuItem("Practice");
+        practiceOption.setMnemonic(KeyEvent.VK_C);
+
+        practiceOption.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                //myBoardPanel.newGame();
+               // myInfoPanel.newGame();
+                //myBoardPanel.clearBoard();
+                myBoardPanel.practiceMode();
+                myInfoPanel.newGame();
+                JOptionPane.showMessageDialog(null, getPractice(),
+                                              "Practice" , JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
+        final JMenuItem infoOption = new JMenuItem("Gameplay");
+        infoOption.setMnemonic(KeyEvent.VK_L);
+
+        infoOption.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                JOptionPane.showMessageDialog(null, getGameplay(),
+                                              "Gameplay", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
+        final JMenuItem aboutOption = new JMenuItem("About");
+        aboutOption.setMnemonic(KeyEvent.VK_A);
+
+        aboutOption.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                JOptionPane.showMessageDialog(null, getAbout(),
+                                              "About", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
+        helpMenu.add(practiceOption);
+        helpMenu.addSeparator();
+        helpMenu.add(infoOption);
+        helpMenu.addSeparator();
+        helpMenu.add(aboutOption);
+
+        myMenuBar.add(helpMenu);
+    }
+
+    /**
+     * Returns the string that describes how practice option works.
+     * @return The describing text
+     */
+    private String getPractice() {
+        final StringBuilder stringBuilderPractice = new StringBuilder(150);
+        stringBuilderPractice.append("There is no motion in practice mode.\n"
+                        + "Just keep calm and explore.\n");
+
+        return stringBuilderPractice.toString();
+    }
+
+    /**
+     * Returns the About string.
+     * @return The describing text
+     */
+    private String getAbout() {
+        final StringBuilder stringBuilderAbout = new StringBuilder(500);
+        stringBuilderAbout.append("TCSS 305 Tetris, Autumn 2015\n\n"
+                        + "Tetris is a Russian tile-matching puzzle video game,"
+                        + " originally designed \n"
+                        + "and programmed by Alexey Pajitnov. It was released on"
+                        + " June 6, 1984 while \n"
+                        + "he was working for the Dorodnicyn Computing Centre of"
+                        + " the Academy of \n"
+                        + "Science of the USSR in Moscow. He derived its name "
+                        + "from the Greek numerical \n"
+                        + "prefix tetra- (all of the game's pieces contain four"
+                        + " segments) and tennis, \n"
+                        + "Pajitnov's favorite sport.\nSource: Wikipedia");
+
+        return stringBuilderAbout.toString();
+    }
+
+    /**
+     * Returns the string that describes how game play is. 
+     * @return The describing text
+     */
+    private String getGameplay() {
+        final StringBuilder stringBuilderGameplay = new StringBuilder(1500);
+        stringBuilderGameplay.append("'Tetriminos' are game pieces shaped "
+                        + "like tetrominoes, geometric shapes\n"
+                        + "composed of four square blocks each."
+                        + " A random sequence of Tetriminos\n"
+                        + "fall down the playing field (a "
+                        + "rectangular vertical shaft, called the\n"
+                        + "'well' or 'matrix'). The objective of the game is"
+                        + " to manipulate these\n"
+                        + "Tetriminos, by moving each one sideways (if the "
+                        + "player feels the need)\n"
+                        + "and rotating it by 90 degree units, with the aim "
+                        + "of creating a horizontal\n"
+                        + "line of ten units without gaps. When such a line "
+                        + "is created, it disappears,\n"
+                        + "and any block above the deleted line will fall. "
+                        + "When a certain number of\n"
+                        + "lines are cleared, the game enters a new level. "
+                        + "As the game progresses,\n"
+                        + "each level causes the Tetriminos to fall faster, "
+                        + "and the game ends when\n"
+                        + "stack of Tetriminos reaches the top of the playing "
+                        + "field and no new\n"
+                        + "Tetriminos are able to enter. Some games also end "
+                        + "after a finite number of\n"
+                        + "levels or lines.\n"
+                        + "All of the Tetriminos are capable of single and double"
+                        + " clears. I, J, and L are\n"
+                        + "able to clear triples. Only the I Tetrimino has the "
+                        + "capacity to clear four lines\n"
+                        + "simultaneously, and this is referred to as a 'tetris'."
+                        + " (This may vary depending\n"
+                        + "on the rotation and compensation rules of each specific"
+                        + " Tetris implementation.\n"
+                        + "For instance, in the Super Rotation System used in most"
+                        + " recent implementations,\n"
+                        + "certain situations allow T, S, and Z to 'snap' into "
+                        + "tight spots and clear triples.)\n"
+                        + "Source: Wikipedia");
+
+        return stringBuilderGameplay.toString();
+    }
+}
